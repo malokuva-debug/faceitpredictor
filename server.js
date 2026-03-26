@@ -25,10 +25,10 @@ app.use(cors({ origin: '*' })); // Chrome extension needs this
    ══════════════════════════════════════════════════════════════ */
 
 // ── Your FACEIT API key (server.faceit.com → Apps → Create App) ──
-const FACEIT_API_KEY = 'YOUR_FACEIT_API_KEY_HERE';
+const FACEIT_API_KEY = '22986c72-5806-4fa8-8c48-3e199cda8437';
 
 // ── JWT signing secret — change to a long random string in production ──
-const JWT_SECRET = 'fp-change-this-secret-in-production-2024';
+const JWT_SECRET = '9f3c6a1e7b8d4c2f91a0e5d6b3c7f8a2d4e6f1c9b8a7d3e5f2c1a9b0e6d7c8f4b2a1c3d5e7f9a0b6c8d2e4f1a7b9c3d5';
 
 // ── Port ──
 const PORT = 3001;
