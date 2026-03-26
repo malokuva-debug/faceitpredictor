@@ -18,7 +18,7 @@ const jwt     = require('jsonwebtoken');
 
 const FACEIT_CLIENT_ID     = 'cf30058a-c266-406a-beea-40301216f917';
 const FACEIT_CLIENT_SECRET = 'YOUR_FACEIT_CLIENT_SECRET';
-const SERVER_BASE          = `https://faceitpredictor.onrender.com/`; // for redirect_uri
+const SERVER_BASE = process.env.SERVER_URL || `https://faceitpredictor.onrender.com`;
 
 const app = express();
 app.use(express.json());
@@ -369,6 +369,17 @@ function predictServer(match, players) {
   const reg = countryToRegion(top);
   return reg ? (REGION_LABELS[reg] ?? reg) : '❓ Unknown';
 }
+
+app.get('/api/auth/faceit', (req, res) => {
+  const redirect = SERVER_BASE + '/popup-success';
+  const params = querystring.stringify({
+    response_type: 'code',
+    client_id: FACEIT_CLIENT_ID,
+    redirect_uri: redirect,
+    state: 'predictor'
+  });
+  res.redirect(`https://faceit.com/oauth/authorize?${params}`);
+});
 
 // Simple homepage
 app.get('/', (req, res) => {
