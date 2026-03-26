@@ -370,58 +370,9 @@ function predictServer(match, players) {
   return reg ? (REGION_LABELS[reg] ?? reg) : '❓ Unknown';
 }
 
-// Simple homepage for testing
+// Simple homepage
 app.get('/', (req, res) => {
-  res.send(`
-    <h1>FACEIT Predictor Server v2.0</h1>
-    <p>Use the API endpoints:</p>
-    <ul>
-      <li>POST /api/auth/login</li>
-      <li>GET /api/auth/verify</li>
-      <li>GET /api/predict/:matchId</li>
-    </ul>
-  `);
-});
-
-const querystring = require('querystring');
-
-// Redirects user to FACEIT OAuth
-app.get('/api/auth/faceit', (req, res) => {
-  const redirectUri = req.query.redirect_uri;
-  if (!redirectUri) return res.status(400).send('Missing redirect_uri');
-
-  const params = querystring.stringify({
-    response_type: 'code',
-    client_id: '7e9fe30d-3ee3-40da-8ffc-79bb609eec66', // <-- register app on FACEIT
-    redirect_uri: redirectUri,
-    state: 'predictor' // optional
-  });
-
-  res.redirect(`https://faceit.com/oauth/authorize?${params}`);
-});
-
-// Handle redirect back from FACEIT with code
-app.get('/popup-success', async (req, res) => {
-  const { code } = req.query;
-  if (!code) return res.send('No code received');
-
-  // Exchange code for access token
-  const tokenRes = await fetch('https://api.faceit.com/auth/v1/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      client_id: '7e9fe30d-3ee3-40da-8ffc-79bb609eec66',
-      client_secret: 'cf30058a-c266-406a-beea-40301216f917',
-      code,
-    }),
-  });
-  
-  const data = await tokenRes.json();
-  // You now have access_token
-  console.log('FACEIT token:', data);
-
-  res.send('<script>window.close()</script>Login successful, you can close this window.');
+  res.send('<h1>FACEIT Predictor Server v2.0</h1><p>Use /api/auth/login or /api/predict/:matchId</p>');
 });
 
 app.get('/popup-success', async (req, res) => {
