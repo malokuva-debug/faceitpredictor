@@ -16,6 +16,10 @@ const express = require('express');
 const cors    = require('cors');
 const jwt     = require('jsonwebtoken');
 
+const FACEIT_CLIENT_ID     = 'cf30058a-c266-406a-beea-40301216f917';
+const FACEIT_CLIENT_SECRET = 'YOUR_FACEIT_CLIENT_SECRET';
+const SERVER_BASE          = `http://localhost:${PORT}`; // for redirect_uri
+
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: '*' })); // Chrome extension needs this
@@ -366,11 +370,103 @@ function predictServer(match, players) {
   return reg ? (REGION_LABELS[reg] ?? reg) : '❓ Unknown';
 }
 
+// Simple homepage for testing
 app.get('/', (req, res) => {
-  res.send('<h1>FACEIT Predictor Server v2.0</h1><p>Use /api/auth/login or /api/predict/:matchId</p>');
+  res.send(`
+    <h1>FACEIT Predictor Server v2.0</h1>
+    <p>Use the API endpoints:</p>
+    <ul>
+      <li>POST /api/auth/login</li>
+      <li>GET /api/auth/verify</li>
+      <li>GET /api/predict/:matchId</li>
+    </ul>
+  `);
 });
 
-/* 
+const querystring = require('querystring');
+
+// Redirects user to FACEIT OAuth
+app.get('/api/auth/faceit', (req, res) => {
+  const redirectUri = req.query.redirect_uri;
+  if (!redirectUri) return res.status(400).send('Missing redirect_uri');
+
+  const params = querystring.stringify({
+    response_type: 'code',
+    client_id: '7e9fe30d-3ee3-40da-8ffc-79bb609eec66', // <-- register app on FACEIT
+    redirect_uri: redirectUri,
+    state: 'predictor' // optional
+  });
+
+  res.redirect(`https://faceit.com/oauth/authorize?${params}`);
+});
+
+// Handle redirect back from FACEIT with code
+app.get('/popup-success', async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.send('No code received');
+
+  // Exchange code for access token
+  const tokenRes = await fetch('https://api.faceit.com/auth/v1/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      client_id: '7e9fe30d-3ee3-40da-8ffc-79bb609eec66',
+      client_secret: 'cf30058a-c266-406a-beea-40301216f917',
+      code,
+    }),
+  });
+  
+  const data = await tokenRes.json();
+  // You now have access_token
+  console.log('FACEIT token:', data);
+
+  res.send('<script>window.close()</script>Login successful, you can close this window.');
+});
+
+app.get('/popup-success', async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.send('❌ No code received from FACEIT');
+
+  try {
+    // Exchange authorization code for access token
+    const tokenRes = await fetch('https://api.faceit.com/auth/v1/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        client_id: FACEIT_CLIENT_ID,
+        client_secret: FACEIT_CLIENT_SECRET, // may be optional if PKCE is used
+        code,
+      }),
+    });
+
+    const data = await tokenRes.json();
+    if (!data.access_token) return res.send('❌ Failed to get access token');
+
+    // Sign your own JWT for extension usage
+    const jwtToken = jwt.sign({ faceitToken: data.access_token }, JWT_SECRET, { expiresIn: '24h' });
+
+    // Return a simple HTML page that sends the token to the popup
+    res.send(`
+      <script>
+        // Store the token in localStorage
+        localStorage.setItem('fp_token', '${jwtToken}');
+        // Optionally, notify the extension
+        if (window.opener) window.opener.postMessage({ type: 'FACEIT_LOGIN_SUCCESS', token: '${jwtToken}' }, '*');
+        // Close this popup automatically
+        window.close();
+      </script>
+      <p>✅ Login successful! You can close this window.</p>
+    `);
+
+  } catch (err) {
+    console.error('[popup-success]', err);
+    res.send('❌ Error exchanging code for token');
+  }
+});
+
+/*
 
 ══════════════════════════════════════════════════════════════
    START
