@@ -366,7 +366,22 @@ function predictServer(match, players) {
   return reg ? (REGION_LABELS[reg] ?? reg) : '❓ Unknown';
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* 
+
+// Simple homepage for testing
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>FACEIT Predictor Server v2.0</h1>
+    <p>Use the API endpoints:</p>
+    <ul>
+      <li>POST /api/auth/login</li>
+      <li>GET /api/auth/verify</li>
+      <li>GET /api/predict/:matchId</li>
+    </ul>
+  `);
+});
+
+══════════════════════════════════════════════════════════════
    START
    ══════════════════════════════════════════════════════════════ */
 
