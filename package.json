@@ -1,0 +1,18 @@
+{
+  "name": "faceit-predictor-server",
+  "version": "2.0.0",
+  "description": "Backend server for FACEIT Match Predictor Chrome Extension",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
