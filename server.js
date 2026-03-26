@@ -18,7 +18,7 @@ const jwt     = require('jsonwebtoken');
 
 const FACEIT_CLIENT_ID     = 'cf30058a-c266-406a-beea-40301216f917';
 const FACEIT_CLIENT_SECRET = 'YOUR_FACEIT_CLIENT_SECRET';
-const SERVER_BASE          = `http://localhost:${PORT}`; // for redirect_uri
+const SERVER_BASE          = `https://faceitpredictor.onrender.com/`; // for redirect_uri
 
 const app = express();
 app.use(express.json());
