@@ -37,21 +37,9 @@ const JWT_SECRET = '9f3c6a1e7b8d4c2f91a0e5d6b3c7f8a2d4e6f1c9b8a7d3e5f2c1a9b0e6d7
    AUTH
    ══════════════════════════════════════════════════════════════ */
 
-app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body ?? {};
-  if (!username || !password) return res.status(400).json({ error: 'Missing credentials' });
-
-  const expected = USERS[username.toLowerCase()];
-  if (!expected || expected !== password) {
-    return res.status(401).json({ error: 'Invalid username or password' });
-  }
-
-  const token = jwt.sign({ username: username.toLowerCase() }, JWT_SECRET, { expiresIn: '24h' });
-  res.json({ ok: true, token, username: username.toLowerCase() });
-});
-
 app.get('/api/auth/verify', requireAuth, (req, res) => {
-  res.json({ ok: true, username: req.user.username });
+  // req.user.faceitToken contains the FACEIT access token
+  res.json({ ok: true, faceitToken: req.user.faceitToken });
 });
 
 /* ══════════════════════════════════════════════════════════════
