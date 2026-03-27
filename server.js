@@ -16,7 +16,6 @@
 const express = require('express');
 const cors    = require('cors');
 const jwt     = require('jsonwebtoken');
-const fetch   = require('node-fetch'); // ensure node-fetch installed
 
 const FACEIT_CLIENT_ID = 'cf30058a-c266-406a-beea-40301216f917'; // PKCE public client
 const PORT             = process.env.PORT || 3001;
