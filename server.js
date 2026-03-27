@@ -18,7 +18,8 @@ const jwt     = require('jsonwebtoken');
 
 const FACEIT_CLIENT_ID     = 'cf30058a-c266-406a-beea-40301216f917';
 const FACEIT_CLIENT_SECRET = 'YOUR_FACEIT_CLIENT_SECRET';
-const SERVER_BASE = process.env.SERVER_URL || `https://faceitpredictor.onrender.com:${PORT}`;
+const PORT = process.env.PORT || 3001; // Render sets PORT automatically
+const SERVER_BASE = process.env.SERVER_URL || `http://localhost:${PORT}`;
 
 const app = express();
 app.use(express.json());
@@ -33,9 +34,6 @@ const FACEIT_API_KEY = '22986c72-5806-4fa8-8c48-3e199cda8437';
 
 // ── JWT signing secret — change to a long random string in production ──
 const JWT_SECRET = '9f3c6a1e7b8d4c2f91a0e5d6b3c7f8a2d4e6f1c9b8a7d3e5f2c1a9b0e6d7c8f4b2a1c3d5e7f9a0b6c8d2e4f1a7b9c3d5';
-
-// ── Port ──
-const PORT = 3001;
 
 // ── Allowed users  { username: password }  ──────────────────────────────────
 // Change these before deploying. Passwords are plain-text here for
@@ -371,14 +369,17 @@ function predictServer(match, players) {
 }
 
 app.get('/api/auth/faceit', (req, res) => {
-  const redirect = SERVER_BASE + '/popup-success';
-  const params = querystring.stringify({
+  const redirectUri = req.query.redirect_uri || `${SERVER_BASE}/popup-success`;
+  if (!redirectUri) return res.status(400).send('Missing redirect_uri');
+
+  const params = new URLSearchParams({
     response_type: 'code',
     client_id: FACEIT_CLIENT_ID,
-    redirect_uri: redirect,
-    state: 'predictor'
+    redirect_uri: redirectUri,
+    state: req.query.state || 'predictor',
   });
-  res.redirect(`https://faceit.com/oauth/authorize?${params}`);
+
+  res.redirect(`https://faceit.com/oauth/authorize?${params.toString()}`);
 });
 
 // Simple homepage
